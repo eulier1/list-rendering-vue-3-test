@@ -21,35 +21,26 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
-import axios from "axios";
+import { ref, onMounted, toRef, computed } from "vue";
 import ProductDetail from "./ProductDetail.vue";
+import { useFetch } from "../stores/fetch";
+import { storeToRefs } from "pinia";
 
 const productItemsHeader = ref([
     "id", "title", "description", "price", "discountPercentage", "rating", "stock", "brand", "category", "thumbnail"
 ])
 
-let products = ref([])
-let navigationData = ref({ limit: 10, total: 0, skip: 0 })
+const fetchStore = useFetch()
+
+const { products } = storeToRefs(fetchStore)
 let totalPage = 10
 
-
 onMounted( async () => {
-    await getProducts({limit:10, skip:0})
+    await useFetch().getProducts({ limit:10, skip:0 })
 })
 
-async function getProducts({limit = 10, skip = 0}) {
-    const url = ref(`https://dummyjson.com/products?limit=${limit}&skip=${skip}`)
-    products.value.length = 0
-    try {
-        const response = await axios.get(url.value);    
-        console.log(response)
-        const len = products.value.length
-        products.value = response.data.products
-
-    } catch (error) {
-        console.error(error);
-    }
+function getProducts({ limit = 10, skip = 0 }) {
+    useFetch().getProducts({ limit, skip })
 }
 
 
